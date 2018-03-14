@@ -1,0 +1,194 @@
+<br>
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<svg width="960" height="600"></svg>
+<style>
+
+.link {
+  stroke-width: .1;
+  stroke-opacity: .01;
+}
+
+.node text {
+  pointer-events: none;
+  font: 10px sans-serif;
+}
+
+.node{
+  stroke: black;
+  stroke-width: .5;
+  stroke-opacity: .6;
+}
+
+body {
+    background-color: black;
+}
+
+</style>
+<body>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script>
+
+var path = ("test_set_100_left.csv")
+var pagerank_path = ("page_count_rank_title_100.csv")
+
+var width = 10000,//window.innerWidth,
+    height = 10000,//window.innerHeight,
+    active = d3.select(null),
+    radius = 2,
+    linkLength = 70;
+
+var svg = d3.select("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var force = d3.layout.force()
+    .gravity(0.01)
+    .linkDistance(linkLength)
+    .charge(-50)
+    .size([width, height]);
+
+var minRank = 1,
+	maxRank = 0,
+	interval = 0;
+
+
+d3.csv(pagerank_path, function(nodes){
+
+	var nodelookup = {};
+  	var nodecollector = {};
+  	count = 0;
+
+	nodes.forEach(function(noderow){
+		if (nodelookup[noderow.page_id]==undefined){
+			nodelookup[noderow.page_id] = count;
+			nodecollector[noderow.page_id] = {name: noderow.page_id, pagerank: noderow.rank}
+			if (Number(noderow.rank).toPrecision(20)<Number(minRank).toPrecision(20)) {minRank=Number(noderow.rank).toPrecision(20)}
+			if (Number(noderow.rank).toPrecision(20)>Number(maxRank).toPrecision(20)) {maxRank=Number(noderow.rank).toPrecision(20)}
+			//console.log(typeof minRank)
+			//console.log(Number(minRank).toPrecision(20))
+			//console.log(minRank)
+			//console.log(maxRank)
+			count++
+		}
+	})
+
+	interval = (maxRank-minRank)
+	//console.log(interval)
+	interval = interval/5
+	//console.log(interval)
+	//console.log(typeof interval)
+	//console.log(typeof maxRank)
+	//console.log(typeof minRank)
+
+	//console.log(Number(minRank)+(4*interval))
+	//console.log(minRank)
+	//console.log(maxRank)
+
+	d3.csv(path, function(links){
+
+		var linkcollector = {};
+  		indexsource = 0;
+  		indextarget = 0;
+  		count = 0;
+
+  		links.forEach(function(linkrow){
+  			if ((nodelookup[linkrow.pl_from]!=undefined)&&(nodelookup[linkrow.page_id]!=undefined)){
+  				linkcollector[count] = {source:nodelookup[linkrow.pl_from], target:nodelookup[linkrow.page_id]}
+  				count++
+  			}
+  		})
+
+  		var links = d3.values(linkcollector);
+  		var nodes = d3.values(nodecollector);
+
+  		var link = svg.selectAll(".link")
+    		.data(links)
+    		.enter().append("line")
+    		.attr("class","link")
+    		.style("stroke",function (d){return returnLinkColor(nodes[d.source])})
+    		.style("stroke-width",.5)
+    		.style("stroke-opacity",.4);
+
+    	var node = svg.selectAll(".node")
+    		.data(nodes)
+    		.attr("class","node")
+    		.enter().append("circle")
+    		.attr("r", radius)
+    		.attr("class","node")
+    		.style("fill",returnNodeColor);
+
+    	console.log(links)
+
+    	force
+      		.nodes(nodes)
+      		.links(links)
+      		.start();
+
+  		force.on("tick", function(d) {
+    		node.attr("cx", function(d) { return d.x = Math.max(radius, Math.min(width - radius, d.x)); })
+        		.attr("cy", function(d) { return d.y = Math.max(radius, Math.min(height - radius, d.y)); });
+    		link.attr("x1", function(d) { return d.source.x; })
+        		.attr("y1", function(d) { return d.source.y; })
+        		.attr("x2", function(d) { return d.target.x; })
+        		.attr("y2", function(d) { return d.target.y; });
+  		})
+	})
+})
+
+
+function returnNodeColor(d){
+	//console.log("returnNodeColor")
+	//console.log(d)
+	//console.log(maxRank)
+	//console.log(minRank)
+	//console.log(interval)
+	//console.log(typeof interval)
+	//console.log(Number(d.pagerank).toPrecision(20))
+  	if (Number(d.pagerank).toPrecision(20)<Number(minRank)){
+    	//console.log("Returning from 0")
+    	return "red";
+  	} 
+  	else if (Number(d.pagerank).toPrecision(20)<(Number(minRank)+interval)){
+  		//console.log("Returning from 1")
+    	return "#FF00BF"; //rosa
+  	}
+  	else if (Number(d.pagerank).toPrecision(20)<(Number(minRank)+(2*interval))){
+  		//console.log("Returning from 2")
+    	return "#0080FF"; //Lyseblå
+  	}
+  	else if (Number(d.pagerank).toPrecision(20)<(Number(minRank)+(3*interval))){
+  		//console.log("Returning from 3")
+    	return "#3A01DF"; //mørkeblå
+  	}
+  	else if (Number(d.pagerank).toPrecision(20)<(Number(minRank)+(4*interval))){
+  		//console.log("Returning from 4")
+    	return "#01DFA5"; //grønn
+  	}
+  	else if (Number(d.pagerank).toPrecision(20)<(Number(minRank)+(5*interval))){
+  		//console.log("Returning from 5")
+    	return "#F781F3"; //lilla
+  	}
+  	else if (Number(d.pagerank).toPrecision(20)<(Number(minRank)+(6*interval))){
+  		//console.log("Returning from 6")
+    	return "#FFFF00"; //gul
+    }
+  	else{
+  		console.log(Number(d.pagerank).toPrecision(20))
+  		console.log((Number(minRank)+(5*interval)))
+  		console.log("Returning from nothing")
+    	return "#FFBF00"; //oransje
+  	}
+}
+
+
+function returnLinkColor(d){
+	//console.log("returnLinkColor")
+	//console.log(d)
+	//console.log(returnNodeColor(d))
+	return returnNodeColor(d)
+}
+
+
+</script>
