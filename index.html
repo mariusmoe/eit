@@ -147,7 +147,7 @@
     console.log(node.title);
   }
 
-  function returnNodeColor(d){
+function returnNodeColor(d){
     //console.log("returnNodeColor")
     //console.log(d)
     //console.log(maxRank)
@@ -165,23 +165,23 @@
     }
     else if (Number(d.page_rank).toPrecision(20)<(Number(minRank)+(2*interval))){
       //console.log("Returning from 2")
-      return "#0080FF"; //Lyseblå
+      return "#FFFF00"; //gul
     }
     else if (Number(d.page_rank).toPrecision(20)<(Number(minRank)+(3*interval))){
       //console.log("Returning from 3")
-      return "#3A01DF"; //mørkeblå
+      return "#01DFA5"; //grønn     
     }
     else if (Number(d.page_rank).toPrecision(20)<(Number(minRank)+(4*interval))){
       //console.log("Returning from 4")
-      return "#01DFA5"; //grønn
+      return "#0080FF"; //Lyseblå
     }
     else if (Number(d.page_rank).toPrecision(20)<(Number(minRank)+(5*interval))){
       //console.log("Returning from 5")
-      return "#F781F3"; //lilla
+      return "#3A01DF"; //mørkeblå
     }
     else if (Number(d.page_rank).toPrecision(20)<(Number(minRank)+(6*interval))){
       //console.log("Returning from 6")
-      return "#FFFF00"; //gul
+      return "#F781F3"; //lilla
     }
     else{
       console.log(Number(d.page_rank).toPrecision(20))
@@ -191,7 +191,6 @@
       return "#FFBF00"; //oransje
     }
   }
-
 
   function returnLinkColor(d){
     //console.log("returnLinkColor")
